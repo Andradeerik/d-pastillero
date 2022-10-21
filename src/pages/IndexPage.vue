@@ -1,11 +1,6 @@
 <template>
-  <q-page class="">
-    <q-list
-      v-for="(item, index) in data"
-      :key="index"
-      bordered
-      class="rounded-borders"
-    >
+  <q-page class>
+    <q-list v-for="(item, index) in data" :key="index" bordered class="rounded-borders">
       <q-expansion-item
         expand-separator
         icon="vaccines"
@@ -20,12 +15,7 @@
                 <q-item-section>8:30am</q-item-section>
                 <q-item-section avatar>
                   <q-btn-group push>
-                    <q-btn
-                      color="red"
-                      push
-                      label="pospone"
-                      icon="watch_later"
-                    />
+                    <q-btn color="red" push label="pospone" icon="watch_later" />
                     <q-btn color="green" push label="tomada" icon="done" />
                   </q-btn-group>
                 </q-item-section>
@@ -41,7 +31,7 @@
           <div class="text-h6">pastilla</div>
         </q-card-section>
 
-        <q-card-section class="q-pt-none"> </q-card-section>
+        <q-card-section class="q-pt-none"></q-card-section>
 
         <q-card-actions align="right">
           <q-btn flat label="OK" color="primary" v-close-popup />
@@ -57,6 +47,8 @@
 
 <script setup>
 import { ref } from 'vue';
+
+console.log('hola');
 const card = ref(false);
 const data = [
   {
