@@ -4,10 +4,10 @@
       <q-expansion-item 
       switch-toggle-side
       expand-separator
-       @click="setDefaultDateTime(item)">
+@click="setDefaultDateTime(item)">
         <template v-slot:header>
           <div class="row items-center">
-            <q-item-section avatar>
+<q-item-section avatar>
             <q-icon color="primary" name="vaccines" />
           </q-item-section>
             <div class="col">
@@ -156,6 +156,18 @@ const saveToLocalStorage = () => {
 
 onMounted(() => {
   loadFromLocalStorage();
+
+  setTimeout(() => {
+  if ('Notification' in window && 'serviceWorker' in navigator) {
+    navigator.serviceWorker.ready.then(registration => {
+      registration.showNotification('Notificación de Prueba', {
+        body: 'Esta es una notificación de prueba.',
+        icon: 'icons/icon-128x128.png',
+        badge: 'icons/icon-128x128.png'
+      });
+    });
+  }
+}, 10000); 
 });
 
 watch(data, saveToLocalStorage, { deep: true });
@@ -211,6 +223,7 @@ const markAsTaken = (item, index) => {
 };
 
 const calculateNextDoses = (item) => {
+  console.log('Calculando tomas para:', item);
   if (!item.fechaPrimeraToma) {
     console.error('Fecha de la primera toma no está definida');
     return;
@@ -289,6 +302,33 @@ const getNextDose = (item) => {
   const nextDose = item.tomas.find(toma => !toma.tomada);
   return nextDose ? nextDose.timestamp : null;
 };
+
+// Programar notificaciones locales
+const scheduleNotification = (item) => {
+  const nextDoseTime = getNextDose(item);
+  if (nextDoseTime) {
+    const now = new Date().getTime();
+    const delay = nextDoseTime - now - 2 * 60 * 1000; // 2 minutos antes
+    if (delay > 0) {
+      setTimeout(() => {
+        if ('Notification' in window && 'serviceWorker' in navigator) {
+          navigator.serviceWorker.ready.then(registration => {
+            registration.showNotification('Recordatorio de Medicamento', {
+              body: `Es hora de tomar tu ${item.info.name}.`,
+              icon: 'icons/icon-128x128.png',
+              badge: 'icons/icon-128x128.png'
+            });
+          });
+        }
+      }, delay);
+    }
+  }
+};
+
+// Llamar a scheduleNotification para cada medicamento
+data.value.forEach(item => {
+  scheduleNotification(item);
+});
 </script>
 
 <style scoped>
