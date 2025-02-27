@@ -2,7 +2,7 @@
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
       <q-toolbar>
-        <q-toolbar-title>Pastillas</q-toolbar-title>
+        <q-toolbar-title>Gestor de Medicamentos</q-toolbar-title>
       </q-toolbar>
     </q-header>
 

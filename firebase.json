@@ -3,8 +3,7 @@
     "public": "dist/pwa",
     "headers": [
       {
-        "source": "/service-worker.js",
-        "destination": "/service-worker.js",
+        "source": "/sw.js",
         "headers": [
           {
             "key": "Cache-Control",
@@ -17,11 +16,7 @@
         ]
       }
     ],
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
       {
         "source": "**",
