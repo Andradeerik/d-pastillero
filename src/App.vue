@@ -6,6 +6,7 @@
 
 <script>
 import { onMounted } from 'vue';
+import { Dark } from 'quasar';
 
 export default {
   name: 'App',
@@ -29,6 +30,9 @@ export default {
       //     }
       //   });
       // }
+      // Detectar preferencia del sistema
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      Dark.set(prefersDark);
     });
   },
 };

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Teléfono -->
+  <path fill="#00b4ff" d="M288 0H128C92.7 0 64 28.7 64 64V448c0 35.3 28.7 64 64 64H288c35.3 0 64-28.7 64-64V400c0-8.8-7.2-16-16-16s-16 7.2-16 16v48c0 17.7-14.3 32-32 32H128c-17.7 0-32-14.3-32-32V64c0-17.7 14.3-32 32-32H288c17.7 0 32 14.3 32 32 0 8.8 7.2 16 16 16s16-7.2 16-16c0-35.3-28.7-64-64-64z"/>
+  
+  <!-- Botón redondo inferior -->
+  <circle cx="208" cy="432" r="32" fill="#80bfff"/>
+
+  <!-- Línea superior (botón) -->
+  <rect x="160" y="64" width="112" height="32" rx="16" fill="#00b4ff"/>
+
+  <!-- Cápsula -->
+  <g transform="rotate(45 384 192)">
+    <!-- Contorno -->
+    <rect x="312" y="156" width="92" height="224" rx="50" fill="none" stroke="#00b4ff" stroke-width="32"/>
+    <!-- Línea divisoria -->
+    <line x1="322" y1="264" x2="410" y2="260" stroke="#00b4ff" stroke-width="32"/>
+  </g>
+</svg>

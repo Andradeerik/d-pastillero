@@ -12,24 +12,36 @@
       content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width<% if (ctx.mode.cordova || ctx.mode.capacitor) { %>, viewport-fit=cover<% } %>"
     />
 
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="128x128"
-      href="icons/icon-128x128.png"
-    />
-    <link rel="icon" type="image/ico" href="icon.ico" />
+    <!-- Favicons -->
+    <link rel="icon" type="image/svg+xml" href="logo.svg" />
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16x16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="icons/icon-96x96.png" />
+    <link rel="icon" type="image/png" sizes="128x128" href="icons/icon-128x128.png" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
 
-    <meta property="og:title" content="<%= productDescription %>" />
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png" />
+    <link rel="mask-icon" href="logo.svg" color="#1976D2" />
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#1976D2" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="<%= productName %>" />
+    <meta property="og:description" content="<%= productDescription %>" />
+    <meta property="og:image" content="icons/icon-512x512.png" />
     <meta property="og:url" content="https://d-pastillero.web.app" />
-    <meta
-      property="og:image"
-      content="https://d-pastillero.web.app/icons/icon-128x128.png"
-    />
-    <meta
-      property="og:description"
-      content="Controla tus medicamentos y recordatorios de dosis."
-    />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="<%= productName %>" />
+    <meta name="twitter:description" content="<%= productDescription %>" />
+    <meta name="twitter:image" content="icons/icon-512x512.png" />
   </head>
 
   <body>
