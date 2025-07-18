@@ -3,7 +3,7 @@
       <div v-if="!data || data.length === 0" class="empty-state">
         <div class="text-center">
           <svg width="200" height="200" viewBox="0 0 24 24" class="empty-state-icon">
-            <path fill="currentColor" d="M6 3h12c1.1 0 2 .9 2 2v14c0 1.1-.9 2-2 2H6c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2m0 2v14h12V5H6m3 3h6v2H9V8m0 4h6v2H9v-2m0 4h6v2H9v-2z"/>
+            <path fill="currentColor" d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2M21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9M19 21H5V3H13V9H19M12 11C10.34 11 9 12.34 9 14S10.34 17 12 17 15 15.66 15 14 13.66 11 12 11M12 13C13.1 13 14 13.9 14 15S13.1 17 12 17 10 16.1 10 15 10.9 13 12 13M7 18C7.79 18 8.5 18.37 8.94 19H15.06C15.5 18.37 16.21 18 17 18V20C16.21 20 15.5 19.63 15.06 19H8.94C8.5 19.63 7.79 20 7 20V18Z"/>
           </svg>
           <div class="text-h6 q-mt-md">No hay medicamentos registrados</div>
           <div class="text-body2 text-grey q-mb-md">
@@ -459,6 +459,7 @@
               <q-step
                 :name="1"
                 title="Medicamento"
+                :caption="newMed.name"
                 prefix="1"
                 :done="step > 1"
                 :error="stepErrors.step1"
@@ -466,37 +467,45 @@
               >
                 <div class="text-h6 q-mb-md">¿Qué medicamento necesitas?</div>
   
-                <q-select
+                <q-input
                   ref="nameRef"
                   dense
                   rounded
                   outlined
                   v-model="newMed.name"
-                  :options="medicamentosAutocompletado"
                   label="Nombre del Medicamento"
                   lazy-rules
                   :rules="nameRules"
                   class="q-mb-md"
-                  use-input
-                  input-debounce="0"
-                  @filter="filterMedicamentos"
                   :loading="loading"
                   clearable
-                  hide-selected
-                  fill-input
                   input-class="text-subtitle1"
+                  @update:model-value="filterMedicamentos"
+                  @keydown.enter.prevent="nextStep"
                 >
                   <template v-slot:prepend>
                     <q-icon name="medication" color="primary" />
                   </template>
-                  <template v-slot:no-option>
-                    <q-item>
-                      <q-item-section class="text-grey">
-                        No se encontraron resultados
-                      </q-item-section>
-                    </q-item>
-                  </template>
-                </q-select>
+                </q-input>
+
+                <q-list v-if="showAutocomplete" bordered separator class="rounded-borders q-mb-md" style="max-height: 150px; overflow-y: auto;">
+                  <q-item
+                    v-for="medicamento in medicamentosAutocompletado"
+                    :key="medicamento"
+                    clickable
+                    v-ripple
+                    @click="selectMedicamento(medicamento)"
+                  >
+                    <q-item-section>
+                      {{ medicamento }}
+                    </q-item-section>
+                  </q-item>
+                  <q-item v-if="medicamentosAutocompletado.length === 0">
+                    <q-item-section class="text-grey">
+                      No se encontraron resultados
+                    </q-item-section>
+                  </q-item>
+                </q-list>
   
                 <div class="text-subtitle1 q-mb-sm">Sugerencias:</div>
                 <q-scroll-area
@@ -518,9 +527,15 @@
                           <q-icon :name="medicamentosIconos[nombre]?.icono || medicamentosIconos.default.icono" />
                         </q-avatar>
                         <div class="ellipsis">{{ nombre }}</div>
-                        <q-tooltip>
-                          {{ info.tipo }} - {{ info.cantidadesComunes[0]?.concentracion || info.cantidadesComunes[0] + ' mg' }}
-                        </q-tooltip>
+                        <q-menu>
+                          <q-list style="min-width: 200px">
+                            <q-item>
+                              <q-item-section class="text-body2">
+                                {{ info.tipo }} - {{ info.cantidadesComunes[0]?.concentracion || info.cantidadesComunes[0] + ' mg' }}
+                              </q-item-section>
+                            </q-item>
+                          </q-list>
+                        </q-menu>
                       </q-chip>
                     </div>
                   </div>
@@ -535,106 +550,118 @@
                 :error="stepErrors.step2"
                 header-nav
               >
-                <div class="row q-col-gutter-sm">
+                <div class="column q-gutter-sm">
                   <div class="col-12">
-                    <div class="row q-col-gutter-sm">
-                      <div class="col">
-                        <q-input
-                          ref="cantidadRef"
-                          dense
-                          rounded
-                          outlined
-                          v-model="newMed.cantidad"
-                          label="Cantidad"
-                          type="number"
-                          lazy-rules
-                          :rules="cantidadRules"
+                    <q-input
+                      ref="cantidadRef"
+                      dense
+                      rounded
+                      outlined
+                      v-model="newMed.cantidad"
+                      label="Cantidad"
+                      type="number"
+                      lazy-rules
+                      :rules="cantidadRules"
+                    >
+                      <template v-slot:append>
+                        <q-icon
+                          name="help"
+                          color="info"
+                          size="20px"
+                          class="cursor-pointer"
                         >
-                          <template v-slot:append>
-                            <q-icon
-                              name="help"
-                              color="info"
-                              size="20px"
-                              class="cursor-pointer"
-                            >
-                              <q-tooltip>
-                                Indica la cantidad del medicamento
-                              </q-tooltip>
-                            </q-icon>
-                          </template>
-                        </q-input>
-                      </div>
-                      <div class="col">
-                        <q-select
-                          ref="tipoDeMedicamentoRef"
-                          dense
-                          rounded
-                          outlined
-                          v-model="newMed.tipoDeMedicamento"
-                          :options="tiposDeMedicamentos"
-                          label="Tipo de Medicamento"
-                          lazy-rules
-                          :rules="tipoDeMedicamentoRules"
-                        >
-                          <template v-slot:append>
-                            <q-icon
-                              name="help"
-                              color="info"
-                              size="20px"
-                              class="cursor-pointer"
-                            >
-                              <q-tooltip>
-                                Selecciona el tipo de medicamento (tableta, cápsula, jarabe, etc.)
-                              </q-tooltip>
-                            </q-icon>
-                          </template>
-                          <template v-if="newMed.name && medicamentosInfo[newMed.name]" v-slot:hint>
-                            Sugerido: {{ medicamentosInfo[newMed.name].tipo }}
-                          </template>
-                        </q-select>
-                      </div>
-                    </div>
+                          <q-menu>
+                            <q-list style="min-width: 200px">
+                              <q-item>
+                                <q-item-section class="text-body2">
+                                  Indica la cantidad del medicamento
+                                </q-item-section>
+                              </q-item>
+                            </q-list>
+                          </q-menu>
+                        </q-icon>
+                      </template>
+                    </q-input>
                   </div>
-  
+                  
                   <div class="col-12">
-                    <div class="row q-col-gutter-sm">
-                      <div class="col">
-                        <q-input
-                          ref="frecuenciaRef"
-                          dense
-                          rounded
-                          outlined
-                          v-model="newMed.frecuencia"
-                          label="Frecuencia"
-                          type="number"
-                          lazy-rules
-                          :rules="frecuenciaRules"
+                    <q-select
+                      ref="tipoDeMedicamentoRef"
+                      dense
+                      rounded
+                      outlined
+                      v-model="newMed.tipoDeMedicamento"
+                      :options="tiposDeMedicamentos"
+                      label="Tipo de Medicamento"
+                      lazy-rules
+                      :rules="tipoDeMedicamentoRules"
+                    >
+                      <template v-slot:append>
+                        <q-icon
+                          name="help"
+                          color="info"
+                          size="20px"
+                          class="cursor-pointer"
                         >
-                          <template v-slot:append>
-                            <q-icon
-                              name="help"
-                              color="info"
-                              size="20px"
-                              class="cursor-pointer"
-                            >
-                              <q-tooltip>
-                                Indica cada cuánto tiempo debe tomarse el medicamento
-                              </q-tooltip>
-                            </q-icon>
-                          </template>
-                        </q-input>
-                      </div>
-                      <div class="col-auto">
-                        <q-select
-                          dense
-                          rounded
-                          outlined
-                          v-model="newMed.tipoDeFrecuencia"
-                          :options="['minutos', 'horas', 'días', 'meses']"
-                          style="min-width: 120px"
-                        />
-                      </div>
-                    </div>
+                          <q-menu>
+                            <q-list style="min-width: 200px">
+                              <q-item>
+                                <q-item-section class="text-body2">
+                                  Selecciona el tipo de medicamento (tableta, cápsula, jarabe, etc.)
+                                </q-item-section>
+                              </q-item>
+                            </q-list>
+                          </q-menu>
+                        </q-icon>
+                      </template>
+                      <template v-if="newMed.name && medicamentosInfo[newMed.name]" v-slot:hint>
+                        Sugerido: {{ medicamentosInfo[newMed.name].tipo }}
+                      </template>
+                    </q-select>
+                  </div>
+
+                  <div class="col-12">
+                    <q-input
+                      ref="frecuenciaRef"
+                      dense
+                      rounded
+                      outlined
+                      v-model="newMed.frecuencia"
+                      label="Frecuencia"
+                      type="number"
+                      lazy-rules
+                      :rules="frecuenciaRules"
+                    >
+                      <template v-slot:append>
+                        <q-icon
+                          name="help"
+                          color="info"
+                          size="20px"
+                          class="cursor-pointer"
+                        >
+                          <q-menu>
+                            <q-list style="min-width: 200px">
+                              <q-item>
+                                <q-item-section class="text-body2">
+                                  Indica cada cuánto tiempo debe tomarse el medicamento
+                                </q-item-section>
+                              </q-item>
+                            </q-list>
+                          </q-menu>
+                        </q-icon>
+                      </template>
+                    </q-input>
+                  </div>
+                  
+                  <div class="col-12">
+                    <q-select
+                      dense
+                      rounded
+                      outlined
+                      v-model="newMed.tipoDeFrecuencia"
+                      :options="['minutos', 'horas', 'días', 'meses']"
+                      label="Tipo de Frecuencia"
+                    />
                   </div>
                 </div>
               </q-step>
@@ -647,64 +674,73 @@
                 :error="stepErrors.step3"
                 header-nav
               >
-                <div class="row q-col-gutter-sm">
+                <div class="column q-gutter-sm">
                   <div class="col-12">
-                    <div class="row q-col-gutter-sm">
-                      <div class="col">
-                        <q-input
-                          ref="porTiempoRef"
-                          dense
-                          rounded
-                          outlined
-                          v-model="newMed.porTiempo"
-                          label="Por Tiempo"
-                          type="number"
-                          lazy-rules
-                          :rules="porTiempoRules"
+                    <q-input
+                      ref="porTiempoRef"
+                      dense
+                      rounded
+                      outlined
+                      v-model="newMed.porTiempo"
+                      label="Por Tiempo"
+                      type="number"
+                      lazy-rules
+                      :rules="porTiempoRules"
+                    >
+                      <template v-slot:append>
+                        <q-icon
+                          name="help"
+                          color="info"
+                          size="20px"
+                          class="cursor-pointer"
                         >
-                          <template v-slot:append>
-                            <q-icon
-                              name="help"
-                              color="info"
-                              size="20px"
-                              class="cursor-pointer"
-                            >
-                              <q-tooltip>
-                                Indica por cuánto tiempo debe tomar el medicamento
-                              </q-tooltip>
-                            </q-icon>
-                          </template>
-                        </q-input>
-                      </div>
-                      <div class="col">
-                        <q-select
-                          ref="tipoDTiempoRef"
-                          dense
-                          rounded
-                          outlined
-                          v-model="newMed.tipoDTiempo"
-                          :options="['días', 'semanas', 'meses']"
-                          label="Tipo de Tiempo"
-                          lazy-rules
-                          :rules="tipoDTiempoRules"
-                        >
-                          <template v-slot:append>
-                            <q-icon
-                              name="help"
-                              color="info"
-                              size="20px"
-                              class="cursor-pointer"
-                            >
-                              <q-tooltip>
-                                Selecciona la unidad de tiempo del tratamiento
-                              </q-tooltip>
-                            </q-icon>
-                          </template>
-                        </q-select>
-                      </div>
-                    </div>
+                          <q-menu>
+                            <q-list style="min-width: 200px">
+                              <q-item>
+                                <q-item-section class="text-body2">
+                                  Indica por cuánto tiempo debe tomar el medicamento
+                                </q-item-section>
+                              </q-item>
+                            </q-list>
+                          </q-menu>
+                        </q-icon>
+                      </template>
+                    </q-input>
                   </div>
-  
+                  
+                  <div class="col-12">
+                    <q-select
+                      ref="tipoDTiempoRef"
+                      dense
+                      rounded
+                      outlined
+                      v-model="newMed.tipoDTiempo"
+                      :options="['días', 'semanas', 'meses']"
+                      label="Tipo de Tiempo"
+                      lazy-rules
+                      :rules="tipoDTiempoRules"
+                    >
+                      <template v-slot:append>
+                        <q-icon
+                          name="help"
+                          color="info"
+                          size="20px"
+                          class="cursor-pointer"
+                        >
+                          <q-menu>
+                            <q-list style="min-width: 200px">
+                              <q-item>
+                                <q-item-section class="text-body2">
+                                  Selecciona la unidad de tiempo del tratamiento
+                                </q-item-section>
+                              </q-item>
+                            </q-list>
+                          </q-menu>
+                        </q-icon>
+                      </template>
+                    </q-select>
+                  </div>
+
                   <div class="col-12">
                     <q-input
                       dense
@@ -722,9 +758,15 @@
                           size="20px"
                           class="cursor-pointer"
                         >
-                          <q-tooltip>
-                            Agrega notas o instrucciones especiales sobre el medicamento
-                          </q-tooltip>
+                          <q-menu>
+                            <q-list style="min-width: 200px">
+                              <q-item>
+                                <q-item-section class="text-body2">
+                                  Agrega notas o instrucciones especiales sobre el medicamento
+                                </q-item-section>
+                              </q-item>
+                            </q-list>
+                          </q-menu>
                         </q-icon>
                       </template>
                     </q-input>
@@ -796,6 +838,7 @@
   const { isDark, toggleDarkMode } = useDarkMode();
   
   const card = ref(false);
+  const showAutocomplete = ref(false);
   const recordatoriosGenerados = ref(
     localStorage.getItem('recordatoriosGenerados') === 'true'
   );
@@ -982,20 +1025,22 @@
   ];
   const medicamentosAutocompletado = ref(medicamentosOriginales);
   
-  const filterMedicamentos = (val, update, abort) => {
-    if (val.length < 2) {
-      update(() => {
-        medicamentosAutocompletado.value = medicamentosOriginales;
-      });
+  const filterMedicamentos = (val) => {
+    if (!val || val.length < 2) {
+      medicamentosAutocompletado.value = medicamentosOriginales;
+      showAutocomplete.value = !!val;
       return;
     }
-  
-    update(() => {
-      const needle = val.toLowerCase();
-      medicamentosAutocompletado.value = medicamentosOriginales.filter(
-        v => v.toLowerCase().indexOf(needle) > -1
-      );
-    });
+    const needle = val.toLowerCase();
+    medicamentosAutocompletado.value = medicamentosOriginales.filter(
+      v => v.toLowerCase().indexOf(needle) > -1
+    );
+    showAutocomplete.value = true;
+  };
+
+  const selectMedicamento = (medicamento) => {
+    newMed.value.name = medicamento;
+    showAutocomplete.value = false;
   };
   
   const loadFromLocalStorage = () => {
@@ -1303,6 +1348,7 @@
       fechaPrimeraToma: '',
     });
     card.value = false;
+    showAutocomplete.value = false;
     newMed.value = {
       id: '',
       recordatoriosGenerados: false,
@@ -1351,6 +1397,7 @@
             data.value.splice(originalIndex, 0, lastItem);
           }
         }
+        showAutocomplete.value = false;
         unwatch(); // Dejar de observar después de manejar el cierre
       }
     });

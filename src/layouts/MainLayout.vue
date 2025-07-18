@@ -5,8 +5,8 @@
         <q-btn flat round icon="home" @click="goToLanding" v-if="!isLandingPage" />
         <q-toolbar-title>{{ currentTitle }}</q-toolbar-title>
         <q-btn round flat class="q-ml-md">
-          <q-avatar size="32px">
-            <img src="https://cdn.quasar.dev/img/avatar2.jpg">
+          <q-avatar size="32px" color="primary" text-color="white">
+            <q-icon name="person" size="20px" />
           </q-avatar>
           <q-menu
             transition-show="fade"
@@ -32,8 +32,8 @@
                       <q-item-label>Perfil</q-item-label>
                     </q-item-section>
                   </q-item>
-                <q-avatar size="72px">
-                  <img src="https://cdn.quasar.dev/img/avatar2.jpg">
+                <q-avatar size="72px" color="primary" text-color="white">
+                  <q-icon name="person" size="40px" />
                 </q-avatar>
                 <div class="text-subtitle1 q-mt-md q-mb-xs">Usuario</div>
                 <div class="text-caption q-mb-md">usuario@email.com</div>
